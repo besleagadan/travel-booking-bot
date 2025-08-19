@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  web:
+    container_name: travel-booking-bot_web
+    build: .
+    entrypoint: [ "/entrypoint.sh" ]
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app:cached # optimize for macOS; remove for production
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - selenium
+
+  postgres:
+    container_name: travel-booking-bot_postgres
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  selenium:
+    image: seleniarm/standalone-chromium:latest
+    container_name: travel-booking-bot_slenium
+    shm_size: 2g  # avoid crashes
+    ports:
+      - "4444:4444"
+
+volumes:
+  postgres_data:
